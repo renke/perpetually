@@ -1,0 +1,26 @@
+{
+  "name": "perpetually",
+  "version": "0.0.0",
+  "description": "Infinte scrolling React component",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Renke Grunwald <renke@renke.org> (http://renke.org)",
+  "dependencies": {
+    "babel": "^5.6.5",
+    "chance": "^0.7.6",
+    "jquery": "^2.1.4",
+    "lodash.throttle": "^3.0.3",
+    "node-libs-browser": "^0.5.2",
+    "node-uuid": "^1.4.3",
+    "per-frame": "^3.0.1",
+    "react": "^0.13.3",
+    "webpack": "^1.9.11"
+  },
+  "devDependencies": {
+    "babel-core": "^5.6.5",
+    "babel-loader": "^5.1.4"
+  }
+}

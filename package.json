@@ -13,6 +13,7 @@
     "chance": "^0.7.6",
     "jquery": "^2.1.4",
     "lodash.throttle": "^3.0.3",
+    "lodash.times": "^3.0.3",
     "node-libs-browser": "^0.5.2",
     "node-uuid": "^1.4.3",
     "per-frame": "^3.0.1",

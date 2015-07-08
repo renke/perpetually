@@ -1,7 +1,7 @@
 var webpack = require("webpack");
 
 module.exports = {
-  devtool: "eval-source-map",
+  devtool: "inline-source-map",
 
   context: __dirname + "/lib",
 

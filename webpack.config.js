@@ -7,12 +7,12 @@ module.exports = {
 
   entry: {
     app: [
-      "./index.js",
+      "./demo.js",
     ]
   },
 
   output: {
-    path: __dirname + "/build/",
+    path: __dirname + "/demo/",
     filename: "index.js",
     publicPath: "/"
   },
@@ -24,7 +24,7 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin(),
   ]
 }
+require("babel/polyfill");

@@ -1,6 +1,6 @@
 {
   "name": "perpetually",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "An efficient endless scrolling component for React",
   "main": "index.js",
   "scripts": {

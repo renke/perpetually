@@ -27,4 +27,3 @@ module.exports = {
     new webpack.NoErrorsPlugin(),
   ]
 }
-require("babel/polyfill");

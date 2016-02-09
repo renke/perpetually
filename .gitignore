@@ -1,0 +1,7 @@
+/node_modules
+/npm-debug.log
+perpetually-*.tgz
+
+/lib
+
+/example/lib

@@ -30,7 +30,7 @@ if (process.env.NODE_ENV === "production") {
   ];
 } else {
   entry = [
-    "webpack-hot-middleware/client?reload=true",  
+    "webpack-hot-middleware/client?reload=true",
     ...entry,
   ];
 
@@ -58,7 +58,7 @@ export default {
 
   module: {
     loaders: [
-      { test: /\.js$/, include: path.join(__dirname, "example/src"), loaders: ["babel"] },
+      { test: /\.js$/, exclude: /node_modules/, loaders: ["babel"] },
     ],
   },
 };

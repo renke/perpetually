@@ -1,11 +1,17 @@
 import $ from "jquery";
 import React, {Component} from "react";
+import {times, flatten} from "lodash";
+import update from "react-addons-update";
 import {findDOMNode} from "react-dom";
 
 const BATCH_SIZE = 10;
 const FIRST_BATCH_SIZE = 4;
 
 export default class Perpetually extends Component {
+  static defaultProps = {
+    numberOfColumns: 3,
+  };
+
   constructor(props) {
     super(props);
 
@@ -13,32 +19,57 @@ export default class Perpetually extends Component {
 
     const items = this.prepareChildren(this.props.children);
 
-    // TODO
-    // columns[n] = {
-    //   start, end, topSpacerHeight, bottomSpacerHeight,
-    // }
-
     this.state = {
-      items: items,
-
-      start: 0,
-      end: Math.min(items.length, FIRST_BATCH_SIZE),
-
-      topSpacerHeight: 0,
-      bottomSpacerHeight: 0,
+      columns: this.initializeColumns(this.props.numberOfColumns, items),
     };
+  }
+
+  initializeColumns(numberOfColumns, items) {
+    const columized = this.columnizeItems(numberOfColumns, items);
+
+    const columns = times(numberOfColumns, i => {
+      const items = columized[i];
+
+      return {
+        index: i,
+
+        items,
+
+        start: 0,
+        end: Math.min(items.length, FIRST_BATCH_SIZE),
+
+        topSpacerHeight: 0,
+        bottomSpacerHeight: 0,
+      };
+    });
+
+    return columns;
+  }
+
+  columnizeItems(number, items) {
+    const columnized = [];
+
+    times(number, n => {
+      columnized[n] = [];
+    });
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      columnized[i % number].push(item);
+    }
+
+    return columnized;
   }
 
   prepareChildren(children) {
     const rawItems = this.convertChildren(children);
 
-    const items = rawItems.map(rawItem => {
-
+    const items = rawItems.map((rawItem, i) => {
       const style = {
-        outline: "1px solid black",
+        outline: `1px solid ${["red", "blue", "green"][i % 3]}`,
         margin: 0,
         padding: 0,
-        overflow: "hidden",
+        overflowY: "auto", // Avoid margin collapsing
         boxSizing: "border-box",
       };
 
@@ -71,7 +102,9 @@ export default class Perpetually extends Component {
     const newItems = this.prepareChildren(newProps.children);
 
     const newKeys = newItems.map(item => item.key);
-    const oldKeys = this.state.items.map(item => item.key);
+
+    const oldItems = flatten(this.state.columns.map(column => column.items));
+    const oldKeys = oldItems.map(item => item.key);
 
     const newKeysSet = new Set(newKeys);
     // const oldKeysSet = new Set(oldKeys);
@@ -84,69 +117,120 @@ export default class Perpetually extends Component {
     }
 
     this.state.items = this.prepareChildren(newProps.children);
+
+    // TODO: Check if number of columns changed
+
+    if (newProps.numberOfColumns !== this.props.numberOfColumns) {
+      console.log("numberOfColumns changed", "from", this.props.numberOfColumns, "to", newProps.numberOfColumns);
+      this.state.columns = this.initializeColumns(newProps.numberOfColumns, this.state.items);
+    } else {
+      console.log("numberOfColumns not changed");
+      times(this.props.numberOfColumns, i => {
+        const columized = this.columnizeItems(this.props.numberOfColumns, this.state.items);
+        const items = columized[i];
+        this.state.columns[i].items = items;
+      });
+    }
+
     this.props = newProps;
 
     this.adjust();
   }
 
   update() {
-    if (!this.state.items.length) {
-      return;
-    }
+    const {rects} = this;
 
-    // Get position and size of rendered items
+    for (const column of this.state.columns) {
+      const {items} = column;
 
-    // TODO: For each column
-    const itemNodes = [...findDOMNode(this.refs.itemsContainer).children];
-
-    itemNodes.forEach((itemNode, i) => {
-      const itemIndex = i + this.state.start;
-
-      const relativeRect = itemNode.getBoundingClientRect();
-
-      const rect = {};
-
-      rect.height = Math.round(relativeRect.height);
-      rect.top = Math.round(relativeRect.top + window.scrollY);
-      rect.bottom = Math.round(relativeRect.bottom + window.scrollY);
-
-      this.rects.set(this.state.items[itemIndex].key, rect);
-    });
-
-    // Adjust scroll to account for new items that appeared above the view
-    if (this.topJump) {
-      for (let i = 0; i < this.topJump; i++) {
-        const rect = this.rects.get(this.state.items[this.state.start + i].key);
-        window.scrollBy(0, rect.height);
+      // Nothing to do.
+      if (!items.length) {
+        return;
       }
 
-      this.topJump = 0;
-    }
+      const nodes = [...findDOMNode(this.refs[`column-${column.index}`]).children];
 
-    // Render additional items above the view and remember to scroll accordingly
-    if (this.topDemand) {
-      this.topJump = this.topDemand;
-      this.topDemand = 0;
+      nodes.forEach((node, index) => {
+        const itemIndex = index + column.start;
 
-      this.setState({start: Math.max(0, this.state.start - this.topJump)}, this.adjust);
-    }
+        const relativeRect = node.getBoundingClientRect();
 
-    // Render additional items below the view
-    if (this.bottomDemand) {
-      const bottomDemand = this.bottomDemand;
-      this.bottomDemand = 0;
-      this.setState({end: Math.min(this.state.items.length, this.state.end + bottomDemand)}, this.adjust);
+        const rect = {
+          height: Math.round(relativeRect.height),
+          top: Math.round(relativeRect.top + window.scrollY),
+          bottom: Math.round(relativeRect.bottom + window.scrollY),
+        };
+
+        rects.set(items[itemIndex].key, rect);
+      });
+
+      // TODO
+      // Adjust scroll to account for new items that appeared above the view
+      // if (this.topJump) {
+      //   for (let i = 0; i < this.topJump; i++) {
+      //     const rect = this.rects.get(this.state.items[this.state.start + i].key);
+      //     window.scrollBy(0, rect.height);
+      //   }
+      //
+      //   this.topJump = 0;
+      // }
+
+      // Render additional items above the view and remember to scroll accordingly
+      const {topDemand, start} = column;
+      const {bottomDemand, end} = column;
+
+      if (!topDemand && !bottomDemand) {
+        // Nothing to do.
+        continue;
+      }
+
+      // console.log("update()", "end", end, "bottomDemand", bottomDemand);
+
+      // TODO: Merge all column setState calls
+
+      if (topDemand) {
+        const newState = update(this.state, {
+          columns: {
+            [column.index]: {
+              $merge: {
+                topDemand: 0,
+                start: Math.max(0, start - topDemand),
+              },
+            },
+          },
+        });
+
+        this.setState(newState, this.adjust);
+      }
+
+      // Render additional items below the view
+
+      if (bottomDemand) {
+        const newState = update(this.state, {
+          columns: {
+            [column.index]: {
+              $merge: {
+                bottomDemand: 0,
+                end: Math.min(items.length, end + bottomDemand),
+              },
+            },
+          },
+        });
+
+        this.setState(newState, this.adjust);
+      }
     }
   }
 
-  computeStartAndTopSpacerHeight() {
-    // TODO: For each column
+  computeStartAndTopSpacerHeight(column) {
+    const {items} = column;
+    const {rects} = this;
 
     let topSpacerHeight = 0;
 
-    for (let i = 0; i < this.state.items.length; i++) {
-      const item = this.state.items[i];
-      const rect = this.rects.get(item.key);
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const rect = rects.get(item.key);
 
       // This item has never been rendered, so we know nothing about its height
       // We just give it a height of 0 (implictly).
@@ -164,13 +248,13 @@ export default class Perpetually extends Component {
         for (let j = 1; j <= BATCH_SIZE; j++) {
           const testStart = viewStart - j;
 
-          const otherItem = this.state.items[testStart];
+          const otherItem = items[testStart];
 
           if (!otherItem) {
             break;
           }
 
-          const otherRect = this.rects.get(otherItem.key);
+          const otherRect = rects.get(otherItem.key);
 
           if (!otherRect) {
             break;
@@ -185,8 +269,8 @@ export default class Perpetually extends Component {
         topDemand = Math.min(newStart, topDemand);
         newStart = Math.max(0, newStart);
 
-        const newStartItem = this.state.items[newStart];
-        const newStartRect = this.rects.get(newStartItem.key);
+        const newStartItem = items[newStart];
+        const newStartRect = rects.get(newStartItem.key);
 
         return {start: newStart, topDemand, topSpacerHeight};
       } else {
@@ -197,18 +281,21 @@ export default class Perpetually extends Component {
     return {start: 0, topSpacerHeight: 0};
   }
 
-  computeEndAndBottomSpacerHeight() {
+  computeEndAndBottomSpacerHeight(column) {
+    const {rects} = this;
+    const {items} = column;
+
     let bottomSpacerHeight = 0;
 
-    for (let i = this.state.items.length - 1; i >= 0; i--) {
-      const item = this.state.items[i];
-      const rect = this.rects.get(item.key);
+    for (let i = items.length - 1; i >= 0; i--) {
+      const item = items[i];
+      const rect = rects.get(item.key);
 
       if (!rect) {
         continue;
       }
 
-      if (rect.top - window.scrollY <= Math.round($(window).height())) {
+      if (rect.top - window.scrollY < Math.round($(window).height())) {
         const viewEnd = i;
         let newEnd = viewEnd;
         let bottomDemand = BATCH_SIZE;
@@ -216,13 +303,13 @@ export default class Perpetually extends Component {
         for (let j = 1; j <= BATCH_SIZE; j++) {
           const testEnd = viewEnd + j;
 
-          const otherItem = this.state.items[testEnd];
+          const otherItem = items[testEnd];
 
           if (!otherItem) {
             break;
           }
 
-          const otherRect = this.rects.get(otherItem.key);
+          const otherRect = rects.get(otherItem.key);
 
           if (!otherRect) {
             break;
@@ -234,9 +321,9 @@ export default class Perpetually extends Component {
           bottomSpacerHeight -= otherRect.height;
         }
 
-        newEnd = Math.min(this.state.items.length, newEnd + 1);
+        newEnd = Math.min(items.length, newEnd + 1);
 
-        const distanceToBottom = this.state.items.length - newEnd;
+        const distanceToBottom = items.length - newEnd;
         bottomDemand = Math.min(distanceToBottom, bottomDemand);
 
         return {end: newEnd, bottomDemand, bottomSpacerHeight};
@@ -245,7 +332,7 @@ export default class Perpetually extends Component {
       }
     }
 
-    return {end: 1, bottomDemand: Math.min(this.state.items.length, BATCH_SIZE), bottomSpacerHeight: 0};
+    return {end: 1, bottomDemand: Math.min(items.length, BATCH_SIZE), bottomSpacerHeight: 0};
   }
 
   componentDidMount() {
@@ -274,23 +361,33 @@ export default class Perpetually extends Component {
   }
 
   adjust() {
-    const {start, topDemand, topSpacerHeight} = this.computeStartAndTopSpacerHeight();
-    const {end, bottomDemand, bottomSpacerHeight} = this.computeEndAndBottomSpacerHeight();
+    const newColumns = [];
 
-    this.bottomDemand = bottomDemand;
-    this.topDemand = topDemand;
+    for (const column of this.state.columns) {
+      const {start, topDemand, topSpacerHeight} = this.computeStartAndTopSpacerHeight(column);
+      const {end, bottomDemand, bottomSpacerHeight} = this.computeEndAndBottomSpacerHeight(column)
 
-    this.setState({
-      start,
-      end,
-      topSpacerHeight,
-      bottomSpacerHeight,
-    });
+      const newColumn = {
+        ...column,
+
+        start,
+        topDemand,
+        topSpacerHeight,
+
+        end,
+        bottomDemand,
+        bottomSpacerHeight,
+      };
+
+      newColumns[column.index] = newColumn;
+    }
+
+    this.setState({columns: newColumns});
   }
 
   render() {
     // console.group("render")
-    const shownItems = this.state.items.slice(this.state.start, this.state.end);
+    // const shownItems = this.state.items.slice(this.state.start, this.state.end);
 
     // console.groupEnd("render")
     const topSpacerStyle = Object.assign(
@@ -307,14 +404,32 @@ export default class Perpetually extends Component {
       this.props.bottomSpacerStyle || {},
     );
 
+    const columnsContainers = this.state.columns.map(column => {
+      const width = 100 / this.state.columns.length;
+      const {items, start, end} = column;
+
+      const visibleItems = items.slice(start, end);
+
+      return <div key={column.index} style={{float: "left", width: `${width}%`}}>
+        <div style={{height: `${column.topSpacerHeight || 0 }px`}}/>
+        <div ref={`column-${column.index}`}>
+          {visibleItems}
+        </div>
+        <div style={{height: `${column.bottomSpacerHeight || 0}px`}}/>
+      </div>;
+    });
+
     return (
       <div style={this.props.style}>
         <div style={topSpacerStyle}/>
-        <div ref="itemsContainer">
-          {shownItems}
+        <div style={{clear: "both"}}>
+          {columnsContainers}
         </div>
         <div style={bottomSpacerStyle}/>
       </div>
     );
   }
 }
+        // <div ref="itemsContainer">
+        //   {[] || shownItems}
+        // </div>

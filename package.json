@@ -50,5 +50,9 @@
     "name": "Renke Grunwald",
     "email": "renke@renke.org"
   },
-  "main": "lib"
+  "main": "lib",
+  "dependencies": {
+    "lodash": "^4.3.0",
+    "react-addons-update": "^0.14.7"
+  }
 }

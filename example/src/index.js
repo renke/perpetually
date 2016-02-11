@@ -65,8 +65,8 @@ export default class Example extends Component {
   render() {
     return <div>
       <div style={{position: "fixed", textAlign: "right", right: "0"}}>
-      <button onClick={::this.addColumn}>Add column</button>
-      <button onClick={::this.removeColumn}>Remove column</button>
+        <button onClick={::this.addColumn}>Add column</button>
+        <button onClick={::this.removeColumn}>Remove column</button>
 
         <button onClick={::this.addTop}>Add top</button>
         <button onClick={::this.addBottom}>Add bottom</button>
@@ -77,6 +77,9 @@ export default class Example extends Component {
       <Perpetually numberOfColumns={this.state.numberOfColumns}>
         {this.state.items}
       </Perpetually>
+      <div style={{position: "fixed", textAlign: "right", right: "0", bottom: "0"}}>
+        Version: {__VERSION__}
+      </div>
     </div>;
   }
 }

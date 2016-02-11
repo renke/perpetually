@@ -5,6 +5,11 @@
     "react"
   ],
 
+  "plugins": [
+    "transform-decorators-legacy",
+    "version-inline"
+  ],
+
   "env": {
     "production": {
       "plugins": [
@@ -39,8 +44,5 @@
         ]
       ]
     }
-  },
-  "plugins": [
-    "transform-decorators-legacy"
-  ]
+  }
 }

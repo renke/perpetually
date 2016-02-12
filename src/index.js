@@ -1,5 +1,5 @@
 import update from "react-addons-update";
-import React, {Component} from "react";
+import React, {Component, PropTypes} from "react";
 import {times, flatten} from "lodash";
 import {findDOMNode} from "react-dom";
 
@@ -7,8 +7,16 @@ const BATCH_SIZE = 10;
 const FIRST_BATCH_SIZE = 4;
 
 export default class Perpetually extends Component {
+  static propTypes = {
+    /**
+     * The number of columns. The value should be greater than or equal to 1.
+     *
+     */
+    numberOfColumns: PropTypes.number.isRequired,
+  };
+
   static defaultProps = {
-    numberOfColumns: 3,
+    numberOfColumns: 1,
   };
 
   constructor(props) {

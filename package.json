@@ -47,6 +47,7 @@
     "express": "^4",
     "file-loader": "^0",
     "mocha": "^2",
+    "react-docgen": "^2.7.0",
     "react-dom": "^0",
     "react-transform-catch-errors": "^1",
     "react-transform-hmr": "^0",

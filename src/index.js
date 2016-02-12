@@ -63,16 +63,15 @@ export default class Perpetually extends Component {
   prepareChildren(children) {
     const rawItems = this.convertChildren(children);
 
-    const items = rawItems.map((rawItem, i) => {
+    const items = rawItems.map(rawItem => {
       const style = {
-        outline: `1px solid ${["red", "blue", "green"][i % 3]}`,
         margin: 0,
         padding: 0,
-        overflowY: "auto", // Avoid margin collapsing
+        overflow: "auto", // Avoid margin collapsing
         boxSizing: "border-box",
       };
 
-      return <div key={rawItem.key} style={style}>
+      return <div key={rawItem.key} style={{...style, ...this.props.itemStyle}}>
         {rawItem}
       </div>;
     });

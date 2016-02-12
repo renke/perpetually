@@ -73,9 +73,11 @@ export default class Example extends Component {
         <button onClick={::this.removeTop}>Remove top</button>
         <button onClick={::this.removeBottom}>Remove bottom</button>
       </div>
-      <Perpetually numberOfColumns={this.state.numberOfColumns}>
+
+      <Perpetually numberOfColumns={this.state.numberOfColumns} itemStyle={{outline: "1px solid black"}}>
         {this.state.items}
       </Perpetually>
+
       <div style={{position: "fixed", textAlign: "right", right: "0", bottom: "0"}}>
         Version: {__VERSION__}
       </div>

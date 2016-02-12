@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "generate": "yo @renke/node-lib",
+    "generate": "yo @renke/javascript",
     "check": "eslint src test",
     "watch:check": "watch \"npm run check --silent\"",
     "test": "mocha --compilers js:babel-register",

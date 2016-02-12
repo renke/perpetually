@@ -1,7 +1,6 @@
-import $ from "jquery";
+import update from "react-addons-update";
 import React, {Component} from "react";
 import {times, flatten} from "lodash";
-import update from "react-addons-update";
 import {findDOMNode} from "react-dom";
 
 const BATCH_SIZE = 10;
@@ -338,27 +337,27 @@ export default class Perpetually extends Component {
   componentDidMount() {
     this.update();
 
-    // TODO Remove jquery dependency
-    $(window).on("scroll", this.handleScroll.bind(this));
-    $(window).on("resize", this.handleResize.bind(this));
+    window.addEventListener("scroll", this.handleScroll);
+    window.addEventListener("resize", this.handleResize);
   }
 
   componentWillUnmount() {
-    $(window).off("scroll", this.handleScroll.bind(this));
-    $(window).on("resize", this.handleResize.bind(this));
+    window.removeEventListener("scroll", this.handleScroll);
+    window.removeEventListener("resize", this.handleResize);
   }
 
   componentDidUpdate() {
     this.update();
   }
 
-  handleResize() {
+  handleResize = () => {
     this.adjust();
-  }
+  };
 
-  handleScroll() {
+  handleScroll = () => {
+    console.log("scroll");
     this.adjust();
-  }
+  };
 
   adjust() {
     const newColumns = [];

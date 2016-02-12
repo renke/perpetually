@@ -12,7 +12,7 @@ export default class Perpetually extends Component {
      * The number of columns. The value should be greater than or equal to 1.
      *
      */
-    numberOfColumns: PropTypes.number.isRequired,
+    numberOfColumns: PropTypes.number,
   };
 
   static defaultProps = {

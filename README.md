@@ -12,7 +12,7 @@ npm install --save perpetually
 
 Name | Type | Required | Description
 -----|------|----------|------------
-numberOfColumns | number | ✔ | The number of columns. The value should be greater than or equal to 1.
+numberOfColumns | number |  | The number of columns. The value should be greater than or equal to 1.
 
 # License
 

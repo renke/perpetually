@@ -17,7 +17,7 @@
   "name": "perpetually",
   "version": "0.3.0",
   "description": "perpetually",
-  "private": true,
+  "private": false,
   "author": {
     "name": "Renke Grunwald",
     "email": "renke@renke.org"

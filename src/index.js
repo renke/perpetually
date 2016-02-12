@@ -294,7 +294,7 @@ export default class Perpetually extends Component {
         continue;
       }
 
-      if (rect.top - window.scrollY < Math.round($(window).height())) {
+      if (rect.top - window.scrollY < Math.round(window.innerHeight)) {
         const viewEnd = i;
         let newEnd = viewEnd;
         let bottomDemand = BATCH_SIZE;

@@ -3,7 +3,6 @@ import "file?name=index.html!./index.html";
 import React, {Component} from "react";
 import {randomBytes} from "crypto";
 import {times, random} from "lodash";
-import {update} from "react-addons-update";
 import {render} from "react-dom";
 
 import Perpetually from "../../src";
